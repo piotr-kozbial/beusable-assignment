@@ -43,8 +43,14 @@ Test 3
 ● (input) Free Economy rooms: 7
 ● (output) Usage Premium: 2 (EUR 583)
 ● (output) Usage Economy: 4 (EUR 189.99)
-Test 4
+Test 4 original, INCORRECT
 ● (input) Free Premium rooms: 7
 ● (input) Free Economy rooms: 1
 ● (output) Usage Premium: 7 (EUR 1153)
 ● (output) Usage Economy: 1 (EUR 45.99)
+Test 4 fixed
+● (input) Free Premium rooms: 7
+● (input) Free Economy rooms: 1
+● (output) Usage Premium: 7 (EUR 1153.99)
+● (output) Usage Economy: 1 (EUR 45)
+
