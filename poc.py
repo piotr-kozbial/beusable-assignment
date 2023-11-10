@@ -46,8 +46,8 @@
 #   3) low taken - the top from remaining < 100
 
 # VERSION 1 - straightforward
-def solve(clientOffers, freePremium, freeEconomy):
-    sortedOffers = sorted(clientOffers, reverse=True)
+def solve(offers, freePremium, freeEconomy):
+    sortedOffers = sorted(offers, reverse=True)
     highOffers = [offer for offer in sortedOffers if offer >= 100]
     lowOffers =  [offer for offer in sortedOffers if offer < 100]
 
@@ -86,6 +86,63 @@ def solve2(offers, freePremium, freeEconomy):
             len(economyBookings), sum(economyBookings))
 
 
+# VERSION 3 - iterative, more memory efficient (if offers is a stream/iterable)
+def solve3(offers, freePremium, freeEconomy):
+    class BookingBuffer:
+        def __init__(self, initialCapacity):
+            assert initialCapacity >= 0
+            self.capacity = initialCapacity
+            self.bookings = []
+        def tryInsert(self, offer):
+            # inefficient, in real implementation use a Sorted Set
+            self.bookings = sorted(self.bookings + [offer], reverse=True)
+            return self._kickOutLowestIfCapacityExceeded()
+        def decreaseCapacity(self):
+            assert self.capacity > 0
+            self.capacity -= 1
+            return self._kickOutLowestIfCapacityExceeded()
+        def _kickOutLowestIfCapacityExceeded(self):
+            if len(self.bookings) > self.capacity:
+                self.bookings = self.bookings[:-1]
+                return True
+            return False
+        def getBookings(self):
+            return self.bookings
+
+    class EconomyBookingBuffer(BookingBuffer):
+        def __init__(self, premiumRooms, economyRooms):
+            super().__init__(premiumRooms + economyRooms)
+            self.economyRooms = economyRooms
+        def getTrueEconomyBookings(self):
+            if len(self.bookings) <= self.economyRooms:
+                return self.bookings
+            else:
+                return self.bookings[len(self.bookings)-self.economyRooms:]
+        def getUpgradedEconomyBookings(self):
+            if len(self.bookings) <= self.economyRooms:
+                return []
+            else:
+                return self.bookings[:len(self.bookings)-self.economyRooms]
+
+    truePremiumBookings = BookingBuffer(freePremium)
+    economyBookings = EconomyBookingBuffer(freePremium, freeEconomy)
+
+    for offer in offers:
+        if offer >= 100:
+            kickOut = truePremiumBookings.tryInsert(offer)
+            if not kickOut:
+                economyBookings.decreaseCapacity()
+        else:
+            economyBookings.tryInsert(offer)
+
+    premiumBookings = truePremiumBookings.getBookings() + economyBookings.getUpgradedEconomyBookings()
+    economyBookings = economyBookings.getTrueEconomyBookings()
+        
+    return (len(premiumBookings), sum(premiumBookings),
+            len(economyBookings), sum(economyBookings))
+
+
+
 ### TESTS
 
 testClientOffers = [23, 45, 155, 374, 22, 99.99, 100, 101, 115, 209]
@@ -97,7 +154,7 @@ tests = [(3, 3,    3,  738,    3, 167.99),
          (7, 1,    7, 1153.99, 1,  45)]
 
 def runTest(test):
-    for solveFn in [solve, solve2]:
+    for solveFn in [solve, solve2, solve3]:
         actualResult = solveFn(testClientOffers, test[0], test[1])
         expectedResult = test[2:]
         if actualResult == expectedResult:
