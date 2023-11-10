@@ -45,6 +45,7 @@
 #   2) low upgraded - the top from < 100
 #   3) low taken - the top from remaining < 100
 
+# VERSION 1 - straightforward
 
 def solve(clientOffers, freePremium, freeEconomy):
     sortedOffers = sorted(clientOffers, reverse=True)
@@ -67,6 +68,11 @@ def solve(clientOffers, freePremium, freeEconomy):
             sum(lowOffersTaken))
 
 
+# VERSION 2 - more explicit, asymptotically better: O(n) because no sorting
+
+def solve2(clientOffers, freePremium, freeEconomy):
+    return (0, 0, 0, 0)
+
 ### TESTS
 
 testClientOffers = [23, 45, 155, 374, 22, 99.99, 100, 101, 115, 209]
@@ -78,12 +84,14 @@ tests = [(3, 3,    3,  738,    3, 167.99),
          (7, 1,    7, 1153.99, 1,  45)]
 
 def runTest(test):
-    actualResult = solve(testClientOffers, test[0], test[1])
-    expectedResult = test[2:]
-    if actualResult == expectedResult:
-        print(f"{test} ok")
-    else:
-        print(f"{test} FAILED, actual result: {actualResult}")
+    for solveFn in [solve, solve2]:
+        actualResult = solveFn(testClientOffers, test[0], test[1])
+        expectedResult = test[2:]
+        if actualResult == expectedResult:
+            print(f"{test} ok")
+        else:
+            print(f"{test} FAILED, actual result: {actualResult}")
+    print()
 
 for test in tests:
     runTest(test)
