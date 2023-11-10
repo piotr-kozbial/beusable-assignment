@@ -46,7 +46,6 @@
 #   3) low taken - the top from remaining < 100
 
 # VERSION 1 - straightforward
-
 def solve(clientOffers, freePremium, freeEconomy):
     sortedOffers = sorted(clientOffers, reverse=True)
     highOffers = [offer for offer in sortedOffers if offer >= 100]
@@ -68,10 +67,24 @@ def solve(clientOffers, freePremium, freeEconomy):
             sum(lowOffersTaken))
 
 
-# VERSION 2 - more explicit, asymptotically better: O(n) because no sorting
+# VERSION 2 - simplified:
+def solve2(offers, freePremium, freeEconomy):
+    highOffers = sorted([offer for offer in offers if offer >= 100], reverse=True)
+    lowOffers =  sorted([offer for offer in offers if offer < 100], reverse=True)
 
-def solve2(clientOffers, freePremium, freeEconomy):
-    return (0, 0, 0, 0)
+    highOffersTaken = highOffers[:min(len(highOffers), freePremium)]
+
+    remainingPremium = freePremium - len(highOffersTaken)
+    lowOfferCapacity = freeEconomy + remainingPremium
+    lowOffersTaken = lowOffers[:min(len(lowOffers), lowOfferCapacity)]
+    upgradedOfferCount = max(0, len(lowOffersTaken) - freeEconomy)
+
+    economyBookings = lowOffersTaken[upgradedOfferCount:]
+    premiumBookings = highOffersTaken + lowOffersTaken[:upgradedOfferCount]
+
+    return (len(premiumBookings), sum(premiumBookings),
+            len(economyBookings), sum(economyBookings))
+
 
 ### TESTS
 
