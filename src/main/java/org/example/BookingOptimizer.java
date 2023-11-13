@@ -187,5 +187,5 @@ public class BookingOptimizer {
 					     instance.totalEconomyRoomsIncome()));
     }
 
-    private static EuroAmount HIGH_OFFER_LIMIT = new EuroAmount(100, 0);
+    static EuroAmount HIGH_OFFER_LIMIT = new EuroAmount(100, 0);
 }

@@ -1,6 +1,6 @@
 package org.example;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,12 +23,46 @@ class BookingOptimizerGenerativeTest {
 		     BookingOptimizer.EuroAmount expectedEconomyRoomsIncome)
     {
 	var instance = new BookingOptimizer.ProblemInstance(freePremiumRooms, freeEconomyRooms, clientOffers);
-	check(instance);
+	checkPremiumCapacityNotExceeded(instance);
+	checkEconomyCapacityNotExceeded(instance);
+	checkAllEconomyBookingsAreBelowThreshold(instance);
+	checkAllPremiumBookingsAreAtLeastThresholdIfEconomyBelowCapacity(instance);
+	checkPremiumBookingsAreTheTopOnes(instance);
+	checkPremiumBookingsBelowThresholdAreTheTopOnes(instance);
+	checkEconomyBookingsAreTopOnesBelowThresholdAfterPremium(instance);
     }
 
-    private void check(BookingOptimizer.ProblemInstance instance) {
+    private void checkPremiumCapacityNotExceeded(BookingOptimizer.ProblemInstance instance) {
+	assertTrue(instance.totalPremiumRoomsBooked() <= instance.freePremiumRooms);
     }
-    
+    private void checkEconomyCapacityNotExceeded(BookingOptimizer.ProblemInstance instance) {
+		assertTrue(instance.totalEconomyRoomsBooked() <= instance.freeEconomyRooms);
+    }
+    private void checkAllEconomyBookingsAreBelowThreshold(BookingOptimizer.ProblemInstance instance) {
+	instance.trueEconomyBookings().forEach(booking ->
+            assertTrue(booking.compareTo(BookingOptimizer.HIGH_OFFER_LIMIT) < 0));
+    }
+    private void checkAllPremiumBookingsAreAtLeastThresholdIfEconomyBelowCapacity(
+        BookingOptimizer.ProblemInstance instance)
+    {
+    }
+    private void checkPremiumBookingsAreTheTopOnes(BookingOptimizer.ProblemInstance instance)
+    {
+    }
+    private void checkPremiumBookingsBelowThresholdAreTheTopOnes(BookingOptimizer.ProblemInstance instance)
+    {
+		// - premium bookings < 100 are the top of what we've seen so far
+		// in < 100 range
+    }
+    private void checkEconomyBookingsAreTopOnesBelowThresholdAfterPremium(
+	    BookingOptimizer.ProblemInstance instance)
+    {
+		// - economy bookings are the top of what we've seen so far
+		// in < 100 range, except for the premium bookings
+    }								  
+
+
+    // TODO: random generation (with fixed seeds)
     static List<BookingOptimizer.EuroAmount> clientTestOffers =
                 Arrays.asList(
                     new BookingOptimizer.EuroAmount(23, 0),
