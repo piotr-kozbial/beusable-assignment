@@ -4,7 +4,7 @@ package org.example;
  * Implements the optimization algorithm for the booking problem described
  * in the assignment (note: in real app it would be some reference to requirements).
  */
-class BookingOptimizer {
+public class BookingOptimizer {
     /**
      * Amount of money in EUR currency, in canonical representation,
      * i.e. a number of full euros plus between 0 and 99 cents.
