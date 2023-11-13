@@ -3,6 +3,8 @@ package org.example;
 import java.util.stream.StreamSupport;
 import java.util.stream.Collectors;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Implements the optimization algorithm for the booking problem described
@@ -18,6 +20,9 @@ public class BookingOptimizer {
 	    if (euros < 0) throw new IllegalArgumentException();
 	    if (cents < 0) throw new IllegalArgumentException();
 	    if (cents >= 100) throw new IllegalArgumentException();
+	}
+	public static EuroAmount zero() {
+	    return new EuroAmount(0, 0);
 	}
 	public EuroAmount plus(EuroAmount other) {
 	    long fullCents = this.fullAmountInCents()+ other.fullAmountInCents();
@@ -59,41 +64,128 @@ public class BookingOptimizer {
 	}
     };
 
+    private static class ProblemInstance {
+	public ProblemInstance(
+            int freePremiumRooms,
+	    int freeEconomyRooms,
+	    Iterable<EuroAmount> clientOffers)
+	{
+	    this.freePremiumRooms = freePremiumRooms;
+	    this.freeEconomyRooms = freeEconomyRooms;
+	    this.clientOffers = clientOffers;
+	}
+
+	public int freePremiumRooms;
+	public int freeEconomyRooms;
+	public Iterable<EuroAmount> clientOffers;
+
+	public int totalPremiumRoomsBooked() {
+            return truePremiumBookings().size()+upgradedEconomyBookings().size();
+	}
+
+	public EuroAmount totalPremiumRoomsIncome() {
+	    var truePremiumTotal = calculateTotal(truePremiumBookings());
+	    var upgradedEconomyTotal = calculateTotal(upgradedEconomyBookings());
+	    return truePremiumTotal.plus(upgradedEconomyTotal);
+	}
+
+	public int totalEconomyRoomsBooked() {
+            return trueEconomyBookings().size();
+	}
+
+	public EuroAmount totalEconomyRoomsIncome() {
+            return calculateTotal(trueEconomyBookings());
+	}
+
+	private static EuroAmount calculateTotal(List<EuroAmount> amounts) {
+	    return amounts.stream().reduce(EuroAmount.zero(), EuroAmount::plus);
+	}
+
+	public int upgradeCapacity() {
+	    return freePremiumRooms - truePremiumBookings().size();
+	}
+
+	public int lowOfferCapacity() {
+            return freeEconomyRooms + upgradeCapacity();
+	}
+
+	public int acceptedLowOffersCount() {
+	    return Math.min(lowOffers().size(), lowOfferCapacity());
+	}
+
+	public int upgradedLowOffersCount() {
+            return Math.max(0, acceptedLowOffersCount() - freeEconomyRooms);
+	}
+
+	public List<EuroAmount> truePremiumBookings() {
+            if (truePremiumBookings.isEmpty()) {
+		truePremiumBookings = Optional.of(
+                    highOffers().subList(0, Math.min(highOffers().size(), freePremiumRooms)));
+	    }
+            return truePremiumBookings.get();
+	}
+
+	public List<EuroAmount> upgradedEconomyBookings() {
+            if (upgradedEconomyBookings.isEmpty()) {
+                upgradedEconomyBookings = Optional.of(
+                    lowOffers().subList(0, upgradedLowOffersCount()));
+	    }
+            return upgradedEconomyBookings.get();
+	}
+	private Optional<List<EuroAmount>> upgradedEconomyBookings = Optional.empty();
+
+	private Optional<List<EuroAmount>> truePremiumBookings = Optional.empty();
+	public List<EuroAmount> trueEconomyBookings() {
+            if (trueEconomyBookings.isEmpty()) {
+                trueEconomyBookings = Optional.of(
+                    lowOffers().subList(upgradedLowOffersCount(), acceptedLowOffersCount()));
+	    }
+            return trueEconomyBookings.get();
+	}
+	private Optional<List<EuroAmount>> trueEconomyBookings = Optional.empty();
+
+	public List<EuroAmount> highOffers() {
+	    if (highOffers.isEmpty()) {
+		separateAndSortOffers();
+	    }
+	    return highOffers.get();
+	}
+	public List<EuroAmount> lowOffers() {
+	    if (lowOffers.isEmpty()) {
+		separateAndSortOffers();
+	    }
+	    return lowOffers.get();
+	}
+	private void separateAndSortOffers() {
+	    var separatedOffers = StreamSupport.stream(clientOffers.spliterator(), false)
+		.collect(
+                    Collectors.partitioningBy(
+                        offer -> offer.compareTo(HIGH_OFFER_LIMIT) >= 0));
+
+	    lowOffers = Optional.of(separatedOffers.get(false));
+	    Collections.sort(lowOffers.get(), (a, b) -> b.compareTo(a));
+
+	    highOffers = Optional.of(separatedOffers.get(true));
+	    Collections.sort(highOffers.get(), (a, b) -> b.compareTo(a));
+	}
+	private Optional<List<EuroAmount>> lowOffers = Optional.empty();
+	private Optional<List<EuroAmount>> highOffers = Optional.empty();
+    };
+
     public static OptimizationResult optimize(
         int freePremiumRooms, int freeEconomyRooms, Iterable<EuroAmount> clientOffers)
     {
 	if (freePremiumRooms < 0) throw new IllegalArgumentException();
 	if (freeEconomyRooms < 0) throw new IllegalArgumentException();
 
-	var HighOfferLimit = new EuroAmount(100, 0);
-	var separatedOffers = StreamSupport.stream(clientOffers.spliterator(), false)
-	    .collect(Collectors.partitioningBy(offer -> offer.compareTo(HighOfferLimit) >= 0));
-	var lowOffers = separatedOffers.get(false);
-	Collections.sort(lowOffers, (a, b) -> b.compareTo(a));
-	var highOffers = separatedOffers.get(true);
-	Collections.sort(highOffers, (a, b) -> b.compareTo(a));
-
-	var highOffersTaken = highOffers.subList(0, Math.min(highOffers.size(), freePremiumRooms));
-
-	var remainingPremiumRooms = freePremiumRooms - highOffersTaken.size();
-	var lowOfferCapacity = freeEconomyRooms + remainingPremiumRooms;
-	var lowOffersTaken = lowOffers.subList(0, Math.min(lowOffers.size(), lowOfferCapacity));
-	var upgradedOfferCount = Math.max(0, lowOffersTaken.size() - freeEconomyRooms);
-
-	var truePremiumBookings = highOffersTaken;
-	var upgradedEconomyBookings = lowOffersTaken.subList(0, upgradedOfferCount);
-	var trueEconomyBookings = lowOffersTaken.subList(upgradedOfferCount, lowOffersTaken.size());
+	var instance = new ProblemInstance(freePremiumRooms, freeEconomyRooms, clientOffers);
 
 	return new OptimizationResult(
-            new OptimizationResultForPremium(
-                truePremiumBookings.size()+upgradedEconomyBookings.size(),
-		truePremiumBookings.stream().reduce(new EuroAmount(0, 0),
-						    EuroAmount::plus).plus(
-		upgradedEconomyBookings.stream().reduce(new EuroAmount(0, 0),
-							EuroAmount::plus))),
-            new OptimizationResultForEconomy(
-                trueEconomyBookings.size(),
-		trueEconomyBookings.stream().reduce(new EuroAmount(0, 0),
-						    EuroAmount::plus)));
+	    new OptimizationResultForPremium(instance.totalPremiumRoomsBooked(),
+					     instance.totalPremiumRoomsIncome()),
+            new OptimizationResultForEconomy(instance.totalEconomyRoomsBooked(),
+					     instance.totalEconomyRoomsIncome()));
     }
+
+    private static EuroAmount HIGH_OFFER_LIMIT = new EuroAmount(100, 0);
 }
