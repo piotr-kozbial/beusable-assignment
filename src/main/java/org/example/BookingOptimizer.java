@@ -64,7 +64,7 @@ public class BookingOptimizer {
 	}
     };
 
-    private static class ProblemInstance {
+    static class ProblemInstance {
 	public ProblemInstance(
             int freePremiumRooms,
 	    int freeEconomyRooms,
