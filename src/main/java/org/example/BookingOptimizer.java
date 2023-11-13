@@ -1,5 +1,9 @@
 package org.example;
 
+import java.util.stream.StreamSupport;
+import java.util.stream.Collectors;
+import java.util.Collections;
+
 /**
  * Implements the optimization algorithm for the booking problem described
  * in the assignment (note: in real app it would be some reference to requirements).
@@ -16,8 +20,11 @@ public class BookingOptimizer {
 	    if (cents >= 100) throw new IllegalArgumentException();
 	}
 	public EuroAmount plus(EuroAmount other) {
-	    long fullCents = this.cents + other.cents;
+	    long fullCents = this.fullAmountInCents()+ other.fullAmountInCents();
 	    return new EuroAmount(fullCents / 100, (short)(fullCents % 100));
+	}
+	public long fullAmountInCents() {
+	    return 100*this.euros + this.cents;
 	}
 	@Override
 	public int compareTo(EuroAmount other) {
@@ -57,9 +64,36 @@ public class BookingOptimizer {
     {
 	if (freePremiumRooms < 0) throw new IllegalArgumentException();
 	if (freeEconomyRooms < 0) throw new IllegalArgumentException();
-	var r = new OptimizationResult(
-            new OptimizationResultForPremium(0, new EuroAmount(0, 0)),
-            new OptimizationResultForEconomy(0, new EuroAmount(0, 0)));
-	return r;
+
+	var HighOfferLimit = new EuroAmount(100, 0);
+	var separatedOffers = StreamSupport.stream(clientOffers.spliterator(), false)
+	    .collect(Collectors.partitioningBy(offer -> offer.compareTo(HighOfferLimit) >= 0));
+	var lowOffers = separatedOffers.get(false);
+	Collections.sort(lowOffers, (a, b) -> b.compareTo(a));
+	var highOffers = separatedOffers.get(true);
+	Collections.sort(highOffers, (a, b) -> b.compareTo(a));
+
+	var highOffersTaken = highOffers.subList(0, Math.min(highOffers.size(), freePremiumRooms));
+
+	var remainingPremiumRooms = freePremiumRooms - highOffersTaken.size();
+	var lowOfferCapacity = freeEconomyRooms + remainingPremiumRooms;
+	var lowOffersTaken = lowOffers.subList(0, Math.min(lowOffers.size(), lowOfferCapacity));
+	var upgradedOfferCount = Math.max(0, lowOffersTaken.size() - freeEconomyRooms);
+
+	var truePremiumBookings = highOffersTaken;
+	var upgradedEconomyBookings = lowOffersTaken.subList(0, upgradedOfferCount);
+	var trueEconomyBookings = lowOffersTaken.subList(upgradedOfferCount, lowOffersTaken.size());
+
+	return new OptimizationResult(
+            new OptimizationResultForPremium(
+                truePremiumBookings.size()+upgradedEconomyBookings.size(),
+		truePremiumBookings.stream().reduce(new EuroAmount(0, 0),
+						    EuroAmount::plus).plus(
+		upgradedEconomyBookings.stream().reduce(new EuroAmount(0, 0),
+							EuroAmount::plus))),
+            new OptimizationResultForEconomy(
+                trueEconomyBookings.size(),
+		trueEconomyBookings.stream().reduce(new EuroAmount(0, 0),
+						    EuroAmount::plus)));
     }
 }
