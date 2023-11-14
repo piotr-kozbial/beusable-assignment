@@ -33,8 +33,8 @@ public class BookingOptimizer {
 	}
 	@Override
 	public int compareTo(EuroAmount other) {
-	    long thisFullCents = 100*this.euros+ this.cents;
-	    long otherFullCents = 100*other.euros+100*other.cents;
+	    long thisFullCents = 100*this.euros+this.cents;
+	    long otherFullCents = 100*other.euros+other.cents;
 	    if (thisFullCents < otherFullCents) {
 		return -1;
 	    } else if (thisFullCents == otherFullCents) {
@@ -68,7 +68,7 @@ public class BookingOptimizer {
 	public ProblemInstance(
             int freePremiumRooms,
 	    int freeEconomyRooms,
-	    Iterable<EuroAmount> clientOffers)
+	    List<EuroAmount> clientOffers)
 	{
 	    this.freePremiumRooms = freePremiumRooms;
 	    this.freeEconomyRooms = freeEconomyRooms;
@@ -77,7 +77,7 @@ public class BookingOptimizer {
 
 	public int freePremiumRooms;
 	public int freeEconomyRooms;
-	public Iterable<EuroAmount> clientOffers;
+	public List<EuroAmount> clientOffers;
 
 	public int totalPremiumRoomsBooked() {
             return truePremiumBookings().size()+upgradedEconomyBookings().size();
@@ -173,7 +173,7 @@ public class BookingOptimizer {
     };
 
     public static OptimizationResult optimize(
-        int freePremiumRooms, int freeEconomyRooms, Iterable<EuroAmount> clientOffers)
+        int freePremiumRooms, int freeEconomyRooms, List<EuroAmount> clientOffers)
     {
 	if (freePremiumRooms < 0) throw new IllegalArgumentException();
 	if (freeEconomyRooms < 0) throw new IllegalArgumentException();
