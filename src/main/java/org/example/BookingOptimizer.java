@@ -2,6 +2,9 @@ package org.example;
 
 import java.util.stream.StreamSupport;
 import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +26,14 @@ public class BookingOptimizer {
 	}
 	public static EuroAmount zero() {
 	    return new EuroAmount(0, 0);
+	}
+	public static EuroAmount ofDouble(double value) {
+		var decimal = new BigDecimal(value);
+		var euros = decimal.longValue();
+		var cents = decimal.remainder(BigDecimal.ONE)
+		    .round(MathContext.DECIMAL32)
+		    .movePointRight(2).intValue();
+		return new EuroAmount(euros, cents);
 	}
 	public EuroAmount plus(EuroAmount other) {
 	    long fullCents = this.fullAmountInCents()+ other.fullAmountInCents();
