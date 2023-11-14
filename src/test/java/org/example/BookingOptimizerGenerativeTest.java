@@ -13,7 +13,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class BookingOptimizerGenerativeTest {
   private static record TestArguments(
-      int freePremiumRooms, int freeEconomyRooms, List<BookingOptimizer.EuroAmount> clientOffers) {}
+      int freePremiumRooms, int freeEconomyRooms, List<EuroAmount> clientOffers) {}
   ;
 
   @ParameterizedTest
@@ -73,17 +73,17 @@ class BookingOptimizerGenerativeTest {
     return tests.stream().map(Arguments::of);
   }
 
-  private static List<BookingOptimizer.EuroAmount> randomClientOffers(Random random) {
+  private static List<EuroAmount> randomClientOffers(Random random) {
     int offerCount = random.nextInt(MAX_OFFER_LIST_LENGTH);
-    var offers = new ArrayList<BookingOptimizer.EuroAmount>(offerCount);
+    var offers = new ArrayList<EuroAmount>(offerCount);
     for (int i = 0; i < offerCount; i++) {
       offers.add(randomOffer(random));
     }
     return offers;
   }
 
-  private static BookingOptimizer.EuroAmount randomOffer(Random random) {
+  private static EuroAmount randomOffer(Random random) {
     int cents = random.nextInt(MAX_OFFER_IN_CENTS);
-    return new BookingOptimizer.EuroAmount(cents / 100, cents % 100);
+    return new EuroAmount(cents / 100, cents % 100);
   }
 }

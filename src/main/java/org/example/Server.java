@@ -30,9 +30,7 @@ public class Server {
   public ResponseEntity<BookingOptimizer.OptimizationResult> hello(
       @RequestBody OptimizeBookingsRequest request) {
     var clientOffers =
-        request.clientOffers.stream()
-            .map(BookingOptimizer.EuroAmount::ofDouble)
-            .collect(Collectors.toList());
+        request.clientOffers.stream().map(EuroAmount::ofDouble).collect(Collectors.toList());
     var result =
         BookingOptimizer.optimize(request.freePremiumRooms, request.freeEconomyRooms, clientOffers);
     return new ResponseEntity<>(result, HttpStatus.OK);
