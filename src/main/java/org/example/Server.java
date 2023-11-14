@@ -27,7 +27,7 @@ public class Server {
       path = "/optimize-bookings",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<BookingOptimizer.OptimizationResult> hello(
+  public ResponseEntity<BookingOptimizer.OptimizationResult> optimizeBookings(
       @RequestBody OptimizeBookingsRequest request) {
     var clientOffers =
         request.clientOffers.stream().map(EuroAmount::ofDouble).collect(Collectors.toList());

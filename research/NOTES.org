@@ -17,40 +17,40 @@ numbers that is their willingness to pay for the night.
 Use the following raw JSON file/structure as mock data for potential guests in your
 tests: [23, 45, 155, 374, 22, 99.99, 100, 101, 115, 209]
 ** Requirements for a valid solution
-● A working algorithm implemented in at least Java 11.
-● Tracking progress through Git commits.
-● Minimal readme explaining how to run the project and tests.
-● Tests/TDD (at least use the ones specified above).
-● Clean code structure and formatting.
-● Thoughtful naming of variables and functions.
-● Go for high code quality rather than completeness, if you feel time pressure.
+- A working algorithm implemented in at least Java 11.
+- Tracking progress through Git commits.
+- Minimal readme explaining how to run the project and tests.
+- Tests/TDD (at least use the ones specified above).
+- Clean code structure and formatting.
+- Thoughtful naming of variables and functions.
+- Go for high code quality rather than completeness, if you feel time pressure.
 ** Nice to haves
-● A restful JSON API implemented with Spring Boot or a comparable framework.
-● Anything else you would like to add.
+- A restful JSON API implemented with Spring Boot or a comparable framework.
+- Anything else you would like to add.
 ** Tests
-Test 1
-● (input) Free Premium rooms: 3
-● (input) Free Economy rooms: 3
-● (output) Usage Premium: 3 (EUR 738)
-● (output) Usage Economy: 3 (EUR 167.99)
-Test 2
-● (input) Free Premium rooms: 7
-● (input) Free Economy rooms: 5
-● (output) Usage Premium: 6 (EUR 1054)
-● (output) Usage Economy: 4 (EUR 189.99)
-Test 3
-● (input) Free Premium rooms: 2
-● (input) Free Economy rooms: 7
-● (output) Usage Premium: 2 (EUR 583)
-● (output) Usage Economy: 4 (EUR 189.99)
-Test 4 original, INCORRECT
-● (input) Free Premium rooms: 7
-● (input) Free Economy rooms: 1
-● (output) Usage Premium: 7 (EUR 1153)
-● (output) Usage Economy: 1 (EUR 45.99)
-Test 4 fixed
-● (input) Free Premium rooms: 7
-● (input) Free Economy rooms: 1
-● (output) Usage Premium: 7 (EUR 1153.99)
-● (output) Usage Economy: 1 (EUR 45)
+*** Test 1
+- (input) Free Premium rooms: 3
+- (input) Free Economy rooms: 3
+- (output) Usage Premium: 3 (EUR 738)
+- (output) Usage Economy: 3 (EUR 167.99)
+*** Test 2
+- (input) Free Premium rooms: 7
+- (input) Free Economy rooms: 5
+- (output) Usage Premium: 6 (EUR 1054)
+- (output) Usage Economy: 4 (EUR 189.99)
+*** Test 3
+- (input) Free Premium rooms: 2
+- (input) Free Economy rooms: 7
+- (output) Usage Premium: 2 (EUR 583)
+- (output) Usage Economy: 4 (EUR 189.99)
+*** Test 4 original, INCORRECT
+- (input) Free Premium rooms: 7
+- (input) Free Economy rooms: 1
+- (output) Usage Premium: 7 (EUR 1153)
+- (output) Usage Economy: 1 (EUR 45.99)
+*** Test 4 fixed
+- (input) Free Premium rooms: 7
+- (input) Free Economy rooms: 1
+- (output) Usage Premium: 7 (EUR 1153.99)
+- (output) Usage Economy: 1 (EUR 45)
 
